@@ -1,5 +1,6 @@
 # Autor: Rafael Padilha
 # Implementação de analizador lexico em python
+# OLA MUNDO
 
 # Função para buscar qual coluna da linha se inicia a palavra informada.
 # Recebe a string linha e a string palavra, retorna um inteiro.
