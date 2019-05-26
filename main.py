@@ -4,7 +4,7 @@ from parser2 import Parser
 text_input = """
 proc main()
 {
-    prnt(\"Teste\");
+    prnt(\"Temos um print k k k\");
 }
 """
 
@@ -20,3 +20,4 @@ pg = Parser()
 pg.parse()
 parser = pg.get_parser()
 parser.parse(tokens).eval()
+

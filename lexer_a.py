@@ -51,7 +51,7 @@ class Lexer():
 
         self.lexer.add('FLOAT_L',r'[0-9]*,[0-9]+|[0-9]+,[0-9]*')
         self.lexer.add('INT_L',r'[0-9]+')
-	self.lexer.add('CHAR_L',r'\"([0-9]|[a-zA-Z]|\n|\t|\s|:|\(|\)|,)+\"')
+        self.lexer.add('CHAR_L',r'\"([0-9]|[a-zA-Z]|\n|\t|\s|:|\(|\)|,)+\"')
 
         self.lexer.ignore('\s+')
         #self.lexer.ignore('\n+')

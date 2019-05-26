@@ -1,5 +1,5 @@
 from rply import ParserGenerator
-from ast import *
+from ast import Print, Char_L
 
 class Parser():
     def __init__(self):
@@ -12,11 +12,15 @@ class Parser():
         def programa(p):
             print("\nPROG")
             print(p)
+
+            print("\n\nSaida >> ")
+            return(p[0])
         @self.pg.production('decl_global : decl_variavel')
         @self.pg.production('decl_global : decl_funcao')
         def decl_global(p):
             print("\nDECL_GL")
             print(p)
+            return(p[0])
         @self.pg.production('decl_variavel : VAR lista_idents SUB tipo PTV')
         def decl_variavel(p):
             print("\nDECL_VAR")
@@ -37,6 +41,10 @@ class Parser():
         def decl_funcao(p):
             print("\nDECL_FUNCAO")
             print(p)
+            if(len(p)==5):
+                return(p[4])
+            else:
+                return(p[2])
         @self.pg.production('nome_args : ID A_PAR param_formais F_PAR')
         def nome_args(p):
             print("\nNOME_ARGS")
@@ -50,11 +58,14 @@ class Parser():
         def bloco(p):
             print("\nBLOCO")
             print(p)
+            return(p[1])
         @self.pg.production('lista_comandos : comando lista_comandos')
         @self.pg.production('lista_comandos : ')
         def lista_comandos(p):
             print("\nLISTA_CMD")
             print(p)
+            if(len(p)>0):
+                return(p[0])
         @self.pg.production('comando : decl_variavel')
         @self.pg.production('comando : atribuicao')
         @self.pg.production('comando : iteracao')
@@ -66,6 +77,7 @@ class Parser():
         def comando(p):
             print("\nCOMANDOOOOO")
             print(p)
+            return(p[0])
         @self.pg.production('atribuicao : ID ATR exp PTV')
         def atribuicao(p):
             print("\nAAAAAAAAAAAAAAAATR")
@@ -83,6 +95,7 @@ class Parser():
         def escrita(p):
             print("\nESCRITAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
             print(p)
+            return Print(p[2])
         @self.pg.production('chamada_func_cmd : chamada_func PTV')
         def chamada_func_cmd(p):
             print("\nCHAM_FUN_CMD")
@@ -130,7 +143,9 @@ class Parser():
         def expr_basica(p):
             print("\nEXP_BAS")
             print(p)
-            return(p[0])
+            op = p[0]
+            if op.gettokentype() == 'CHAR_L':
+                return Char_L(p[0].value)
         
         @self.pg.error
         def error_handle(token):
