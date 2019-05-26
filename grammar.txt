@@ -1,0 +1,22 @@
+programa : ( decl_global )*
+decl_global : decl_variavel | decl_funcao
+decl_variavel : "VAR" lista_idents "SUB" tipo "PTV"
+lista_idents : "ID" ("VIRG" "ID")*
+tipo : "INT"|"CHAR"|"FLOAT"
+decl_funcao : ("PROC" nome_args "SUB" tipo bloco)|("PROC" nome_args bloco)
+nome_args : ("ID" "A_PAR" param_formais "F_PAR" )+
+param_formais : "ID" "SUB" tipo ("VIRG" "ID" "SUB" tipo)*| 
+bloco : "A_CHA" lista_comandos "F_CHA"
+lista_comandos : (comando)*
+comando : decl_variavel|atribuicao|iteracao|decisao|escrita|retorno|bloco|chamada_func
+atribuicao : "ID" "ATR" exp "PTV"
+iteracao : "WHILE" "A_PAR" exp "F_PAR" "PTV"
+decisao : ("IF" "A_APAR" exp "F_PAR" comando "ELSE" comando)|("IF" "A_PAR" exp "F_PAR" comando)
+escrita : "PRINT" "A_PAR" lista_exprs "F_PAR" "PTV"
+chamada_func_cmd : chamada_func "PTV"
+retorno : "RETURN" exp "PTV"
+chamada_func : ( "ID" "A_PAR" lista_exprs "F_PAR" )+
+lista_exprs :  |exp ("VIRG" exp)*
+exp : (exp "SOM" exp)|(exp "SUB" exp)|(exp "MUL" exp)|(exp "DIV" exp)|(exp "MOD" exp)|(exp "AND" exp)|(exp "OR" exp)|(exp "=" exp)|(exp "<>" exp)|(exp "<=" exp)|(exp "<" exp)|(exp ">=" exp)|(exp ">" exp)|(expr_basica)
+expr_basica : ("A_PAR" exp "F_PAR")|("NOT" expr_basica)|("SUB" expr_basica)|"INT"|"CHAR"|"FLOAT"|"ID"|chamada_func
+
