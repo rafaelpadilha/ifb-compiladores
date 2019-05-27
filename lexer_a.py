@@ -20,9 +20,9 @@ class Lexer():
         self.lexer.add('MUL',r'\*')
         self.lexer.add('DIV',r'\/')
         self.lexer.add('MOD',r'\%')
-        self.lexer.add('AND',r' and ')
-        self.lexer.add('OR',r' or ')
-        self.lexer.add('NOT',r' not ')
+        self.lexer.add('AND',r'and')
+        self.lexer.add('OR',r'or')
+        self.lexer.add('NOT',r'not')
 
         # Atribuicao 
         self.lexer.add('ATR',r':=')
@@ -56,7 +56,7 @@ class Lexer():
         self.lexer.ignore('\s+')
         #self.lexer.ignore('\n+')
 
-	# Identificador
+	    # Identificador
         self.lexer.add('ID', r'[a-z]([a-zA-Z_]|[0-9])*')
 
     def get_lexer(self):

@@ -1,11 +1,13 @@
 from rply import ParserGenerator
-from ast import Print, Char_L
+from ast import *
 
 class Parser():
     def __init__(self):
         self.pg = ParserGenerator(
         ['ID',  '<>',  '<=',  '>=',  '=',  '>',  '<',  'SOM',  'SUB',  'MUL',  'DIV',  'MOD',  'AND',  'OR',  'NOT',  'ATR',  'F_PAR',  'A_PAR',  'VIRG',  'PTV',  'A_CHA',  'F_CHA',  'IF',  'ELSE',  'WHILE',  'RETURN',  'FLOAT',  'CHAR',  'VOID',  'PRINT',  'INT',  'PROC',  'VAR',    'FLOAT',   'INT', 'FLOAT_L', 'INT_L', 'CHAR_L']
         )
+        self.ids = {}
+        self.list_cmds = []
         
     def parse(self):
         @self.pg.production('programa : decl_global')
@@ -14,7 +16,7 @@ class Parser():
             print(p)
 
             print("\n\nSaida >> ")
-            return(p[0])
+            return Prog(p[0])
         @self.pg.production('decl_global : decl_variavel')
         @self.pg.production('decl_global : decl_funcao')
         def decl_global(p):
@@ -25,10 +27,19 @@ class Parser():
         def decl_variavel(p):
             print("\nDECL_VAR")
             print(p)
+            for id in p[1]:
+                self.ids[id.value]=Identificador(p[1],p[3])
+            print(self.ids)
         @self.pg.production('lista_idents : ID')
         def lista_idents(p):
             print("\nLISTA_IDENTS")
             print(p)
+            for id in p:
+                if id not in self.ids:
+                    self.ids[id.value]=None
+                else:
+                    print("ID \" " + id + " ja declarado")
+                return p
         @self.pg.production('tipo : INT')
         @self.pg.production('tipo : CHAR')
         @self.pg.production('tipo : FLOAT')
@@ -36,6 +47,7 @@ class Parser():
         def tipo(p):
             print("\nTIPO")
             print(p)
+            return(p[0])
         @self.pg.production('decl_funcao : PROC nome_args SUB tipo bloco')
         @self.pg.production('decl_funcao : PROC nome_args bloco')
         def decl_funcao(p):
@@ -65,7 +77,7 @@ class Parser():
             print("\nLISTA_CMD")
             print(p)
             if(len(p)>0):
-                return(p[0])
+                return(self.list_cmds)
         @self.pg.production('comando : decl_variavel')
         @self.pg.production('comando : atribuicao')
         @self.pg.production('comando : iteracao')
@@ -77,7 +89,10 @@ class Parser():
         def comando(p):
             print("\nCOMANDOOOOO")
             print(p)
-            return(p[0])
+            if p[0] <> None:
+                self.list_cmds.append(p[0])
+                print("##LISTA CMD" + str(self.list_cmds))
+                return(p[0])
         @self.pg.production('atribuicao : ID ATR exp PTV')
         def atribuicao(p):
             print("\nAAAAAAAAAAAAAAAATR")
@@ -104,6 +119,7 @@ class Parser():
         def retorno(p):
             print("\nRETORNO")
             print(p)
+            return p[1]
         @self.pg.production('chamada_func : ID A_PAR lista_exprs F_PAR')
         def chamada_func(p):
             print("\nCHAMADA_FUNC")
@@ -131,7 +147,36 @@ class Parser():
         def exp(p):
             print("\nEXP")
             print(p)
-            return(p[0])
+            if(len(p)==1):
+                return(p[0])
+            elif(len(p)==3):
+                if p[1].gettokentype() == 'SOM':
+                    return Som(p[0],p[2])
+                elif p[1].gettokentype() == 'SUB':
+                    return Sub(p[0],p[2])
+                elif p[1].gettokentype() == 'MUL':
+                    return Mul(p[0],p[2])
+                elif p[1].gettokentype() == 'DIV':
+                    return Div(p[0],p[2])
+                elif p[1].gettokentype() == 'MOD':
+                    return Mod(p[0],p[2])
+                elif p[1].gettokentype() == 'AND':
+                    return And(p[0],p[2])
+                elif p[1].gettokentype() == 'OR':
+                    return Or(p[0],p[2])
+                elif p[1].gettokentype() == '=':
+                    return Igual(p[0],p[2])
+                elif p[1].gettokentype() == '<>':
+                    return Dif(p[0],p[2])
+                elif p[1].gettokentype() == '<=':
+                    return Menor_Igual(p[0],p[2])
+                elif p[1].gettokentype() == '<':
+                    return Menor(p[0],p[2])
+                elif p[1].gettokentype() == '>=':
+                    return Maior_Igual(p[0],p[2])
+                elif p[1].gettokentype() == '>':
+                    return Maior(p[0],p[2])
+                
         @self.pg.production('expr_basica : A_PAR exp F_PAR')
         @self.pg.production('expr_basica : NOT expr_basica')
         @self.pg.production('expr_basica : SUB expr_basica')
@@ -143,9 +188,26 @@ class Parser():
         def expr_basica(p):
             print("\nEXP_BAS")
             print(p)
-            op = p[0]
-            if op.gettokentype() == 'CHAR_L':
-                return Char_L(p[0].value)
+            if len(p)==3:
+                return(p[1])
+            elif len(p)==2:
+                if p[0].gettokentype() == 'NOT':
+                    return Not(p[1])
+                elif p[0].gettokentype() == 'SUB':
+                    return Traco(p[1])
+                    
+            elif len(p)==1:
+                if p[0].gettokentype() == 'CHAR_L':
+                    return Char_L(p[0].value)
+                elif p[0].gettokentype() == 'INT_L':
+                    return Int_L(p[0].value)
+                elif p[0].gettokentype() == 'FLOAT_L':
+                    return Float_L(p[0].value)
+                elif p[0].gettokentype() == 'ID':
+                    if p[0].value in self.ids:
+                        return self.ids[p[0].value]
+                    else:
+                        print("ID nao declarado.")
         
         @self.pg.error
         def error_handle(token):
