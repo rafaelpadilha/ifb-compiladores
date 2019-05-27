@@ -4,7 +4,8 @@ from parser2 import Parser
 text_input = """
 proc main()
 {
-    prnt(\"Temos um print k k k\");
+    var tmp - int;
+    prnt(tmp);
 }
 """
 
