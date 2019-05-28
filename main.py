@@ -4,8 +4,9 @@ from parser2 import Parser
 text_input = """
 proc main()
 {
-    var tmp - int;
-    prnt(tmp);
+    var tmp, flg, dir, flg2 - int;
+    var tm2 - float;
+    prnt("OLA WORLD");
 }
 """
 
@@ -15,8 +16,8 @@ tokens = lexer.lex(text_input)
 
 
 #for token in tokens:
-    #print(token)
-
+#    print(token)
+    
 pg = Parser()
 pg.parse()
 parser = pg.get_parser()

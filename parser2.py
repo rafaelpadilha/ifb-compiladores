@@ -11,12 +11,15 @@ class Parser():
         
     def parse(self):
         @self.pg.production('programa : decl_global')
+        @self.pg.production('programa : decl_global programa')
+        @self.pg.production('programa : ')
         def programa(p):
             print("\nPROG")
             print(p)
 
             print("\n\nSaida >> ")
-            return Prog(p[0])
+            if len(p)>0:
+                return Prog(p[0])
         @self.pg.production('decl_global : decl_variavel')
         @self.pg.production('decl_global : decl_funcao')
         def decl_global(p):
@@ -28,18 +31,45 @@ class Parser():
             print("\nDECL_VAR")
             print(p)
             for id in p[1]:
-                self.ids[id.value]=Identificador(p[1],p[3])
+                if id <> None:
+                    self.ids[id.value]=Identificador(p[1],p[3])
             print(self.ids)
-        @self.pg.production('lista_idents : ID')
+        @self.pg.production('lista_idents : ID prod1')
         def lista_idents(p):
             print("\nLISTA_IDENTS")
             print(p)
-            for id in p:
+            l_id = [p[0]]
+            if p[1] <> None:
+                for i in p[1]:
+                    l_id.append(i)
+
+            for id in l_id:
                 if id not in self.ids:
                     self.ids[id.value]=None
                 else:
-                    print("ID \" " + id + " ja declarado")
-                return p
+                    print("ID \" " + id + " \" ja declarado")
+                return l_id
+                
+        #PROD1 ADD
+        @self.pg.production('prod1 : VIRG ID prod1')
+        @self.pg.production('prod1 : VIRG ID')
+        @self.pg.production('prod1 : ')
+        def prod1(p):
+            print("\nPROD1")
+            print(p)
+            if len(p)>0:
+                if p[2] == None:
+                    return p[1]
+                else:
+                    if type(p[2])==list:
+                        ret = [p[1]]
+                        for i in p[2]:
+                            ret.append(i)
+                        return ret
+                    else:
+                        return(list([p[1],p[2]]))
+                
+        #END PROD1
         @self.pg.production('tipo : INT')
         @self.pg.production('tipo : CHAR')
         @self.pg.production('tipo : FLOAT')
@@ -57,10 +87,16 @@ class Parser():
                 return(p[4])
             else:
                 return(p[2])
-        @self.pg.production('nome_args : ID A_PAR param_formais F_PAR')
+        @self.pg.production('nome_args : ID A_PAR param_formais F_PAR nome_args')
+        @self.pg.production('nome_args : ID A_PAR param_formais F_PAR ')
         def nome_args(p):
             print("\nNOME_ARGS")
             print(p)
+            
+        #PROD2 ADD
+        #@self.pg.production('prod2 : ID A_PAR param_formais F_PAR prod2')
+        #@self.pg.production('prod2 : ')
+        #END
         @self.pg.production('param_formais : ID SUB tipo')
         @self.pg.production('param_formais : ')
         def param_formais(p):
