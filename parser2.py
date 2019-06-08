@@ -1,31 +1,39 @@
 from rply import ParserGenerator
 from ast import *
+from util import Util
 
 class Parser():
     def __init__(self):
         self.pg = ParserGenerator(
-        ['ID',  '<>',  '<=',  '>=',  '=',  '>',  '<',  'SOM',  'SUB',  'MUL',  'DIV',  'MOD',  'AND',  'OR',  'NOT',  'ATR',  'F_PAR',  'A_PAR',  'VIRG',  'PTV',  'A_CHA',  'F_CHA',  'IF',  'ELSE',  'WHILE',  'RETURN',  'FLOAT',  'CHAR',  'VOID',  'PRINT',  'INT',  'PROC',  'VAR',    'FLOAT',   'INT', 'FLOAT_L', 'INT_L', 'CHAR_L']
+        ['ID',  '<>',  '<=',  '>=',  '=',  '>',  '<',  'SOM',  'SUB',  'MUL',  'DIV',  'MOD',  'AND',  'OR',  'NOT',  'ATR',  'F_PAR',  'A_PAR',  'VIRG',  'PTV',  'A_CHA',  'F_CHA',  'IF',  'ELSE',  'WHILE',  'RETURN',  'FLOAT',  'CHAR',  'VOID',  'PRINT',  'INT',  'PROC',  'VAR',    'FLOAT',   'INT', 'FLOAT_L', 'INT_L', 'CHAR_L'],
+        precedence=[
+            ('left',['NOT']),
+            ('left',['MUL', 'DIV', 'MOD']),
+            ('left',['SOM', 'SUB']),
+            ('left',['=','<>','<','>','<=','>=']),
+            ('left',['OR','AND'])
+        ]
         )
         self.ids = {}
-        self.list_cmds = []
+        #self.list_cmds = []
         
     def parse(self):
         @self.pg.production('programa : decl_global')
         @self.pg.production('programa : decl_global programa')
         @self.pg.production('programa : ')
         def programa(p):
-            print("\nPROG")
-            print(p)
-
-            print("\n\nSaida >> ")
-            if len(p)>0:
-                return Prog(p[0])
+            if len(p)>1:
+                print("\nPROG")
+                print(p)
+                print("SAIDA>>")
+                return Prog(Util(p).ret_out())
         @self.pg.production('decl_global : decl_variavel')
         @self.pg.production('decl_global : decl_funcao')
         def decl_global(p):
             print("\nDECL_GL")
             print(p)
-            return(p[0])
+            if p[0] <> None:
+                return p[0]
         @self.pg.production('decl_variavel : VAR lista_idents SUB tipo PTV')
         def decl_variavel(p):
             print("\nDECL_VAR")
@@ -38,10 +46,8 @@ class Parser():
         def lista_idents(p):
             print("\nLISTA_IDENTS")
             print(p)
-            l_id = [p[0]]
-            if p[1] <> None:
-                for i in p[1]:
-                    l_id.append(i)
+            l_id = Util(p).ret_out()
+            
 
             for id in l_id:
                 if id not in self.ids:
@@ -83,21 +89,22 @@ class Parser():
         def decl_funcao(p):
             print("\nDECL_FUNCAO")
             print(p)
-            if(len(p)==5):
-                return(p[4])
+            if(len(p) == 5):
+                return Func(p[1][1],p[1][2],p[4])
             else:
-                return(p[2])
+                return Func(p[1][0],p[2],p[1][1])
         @self.pg.production('nome_args : ID A_PAR param_formais F_PAR nome_args')
         @self.pg.production('nome_args : ID A_PAR param_formais F_PAR ')
         def nome_args(p):
             print("\nNOME_ARGS")
             print(p)
-            
+            return([p[0],p[2]])
         #PROD2 ADD
         #@self.pg.production('prod2 : ID A_PAR param_formais F_PAR prod2')
         #@self.pg.production('prod2 : ')
         #END
-        @self.pg.production('param_formais : ID SUB tipo')
+        @self.pg.production('param_formais : ID SUB tipo param_formais')
+        @self.pg.production('param_formais : VIRG ID SUB tipo param_formais')
         @self.pg.production('param_formais : ')
         def param_formais(p):
             print("\nPARAM_FORM")
@@ -108,12 +115,20 @@ class Parser():
             print(p)
             return(p[1])
         @self.pg.production('lista_comandos : comando lista_comandos')
-        @self.pg.production('lista_comandos : ')
+        @self.pg.production('lista_comandos : comando ')
         def lista_comandos(p):
             print("\nLISTA_CMD")
             print(p)
-            if(len(p)>0):
-                return(self.list_cmds)
+            #if(len(p)>0):
+                #return(self.list_cmds)
+            cmds_temp = Util(p).ret_out()
+            cmds = []
+            for i in cmds_temp:
+                if(i <> None):
+                    cmds.append(i)
+            print('FLAT')
+            print(cmds)
+            return cmds
         @self.pg.production('comando : decl_variavel')
         @self.pg.production('comando : atribuicao')
         @self.pg.production('comando : iteracao')
@@ -126,13 +141,15 @@ class Parser():
             print("\nCOMANDOOOOO")
             print(p)
             if p[0] <> None:
-                self.list_cmds.append(p[0])
-                print("##LISTA CMD" + str(self.list_cmds))
+                #self.list_cmds.append(p[0])
+                #print("##LISTA CMD" + str(self.list_cmds))
                 return(p[0])
         @self.pg.production('atribuicao : ID ATR exp PTV')
         def atribuicao(p):
             print("\nAAAAAAAAAAAAAAAATR")
             print(p)
+            self.ids[p[0].value].atr(p[2].eval())
+            print(self.ids[p[0].value].eval())
         @self.pg.production('iteracao : WHILE A_PAR exp F_PAR PTV')
         def iteracao(p):
             print("\nITERACAO")
@@ -142,6 +159,17 @@ class Parser():
         def decisao(p):
             print("\nDECISAO")
             print(p)
+            if len(p) == 7:
+                if(p[2].eval == 1):
+                    return p[4]
+                else:
+                    return p[6]
+            else:
+                if(p[2].eval == 1):
+                    return p[4]
+                else:
+                    return None
+            
         @self.pg.production('escrita : PRINT A_PAR lista_exprs F_PAR PTV')
         def escrita(p):
             print("\nESCRITAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
@@ -157,15 +185,26 @@ class Parser():
             print(p)
             return p[1]
         @self.pg.production('chamada_func : ID A_PAR lista_exprs F_PAR')
+        @self.pg.production('chamada_func : ID A_PAR lista_exprs F_PAR chamada_func ')
         def chamada_func(p):
             print("\nCHAMADA_FUNC")
             print(p)
         @self.pg.production('lista_exprs : ')
         @self.pg.production('lista_exprs : exp')
+        @self.pg.production('lista_exprs : exp VIRG lista_exprs')
         def lista_exprs(p):
             print("\nLISTA_EXPS")
             print(p)
-            return(p[0])
+            if len(p) == 1:
+                return(p)
+            else:
+                res = Util(p).ret_out()
+                out = []
+                for i in res:
+                    if isinstance(i,Char_L):
+                        out.append(i)
+                print(out)
+                return(out)
         @self.pg.production('exp : exp SOM exp')
         @self.pg.production('exp : exp SUB exp')
         @self.pg.production('exp : exp MUL exp')
