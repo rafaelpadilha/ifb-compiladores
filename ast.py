@@ -3,8 +3,27 @@ class Prog():
         self.lista = lista
         
     def eval(self):
-        for cmd in self.lista:
-            cmd.eval()
+        if(type(self.lista) == list):
+            for func in self.lista:
+                if func <> None and func.nome.value == 'main':
+                    func.eval()
+        else:
+            self.lista.eval()  
+                  
+class Func():
+    def __init__(self, nome, cmds, param):
+        self.cmds = cmds
+        self.nome = nome
+        self.param = param
+        
+    def eval(self):
+        if self.cmds <> None:
+            if(type(self.cmds) == list):
+                for i in self.cmds:
+                    if i <> None:
+                        return i.eval()
+            else:
+                return self.cmds.eval()
 
 #Print
 class Print():
@@ -12,7 +31,14 @@ class Print():
         self.value = value
         
     def eval(self):
-        print(self.value.eval())
+        if isinstance(self.value, list):
+            self.out=''
+            for i in self.value:
+                j = str(i.eval())
+                self.out = self.out + j
+            print(self.out)
+        else:
+            print(self.value.eval())
         
 #Operacoes
 class OpBin():
@@ -120,6 +146,9 @@ class Identificador():
     def eval(self):
         return self.value
         
+    def atr(self,val):
+        self.value = val
+        
     def addr():
         return self
         
@@ -145,4 +174,6 @@ class Char_L():
         self.value = value
         
     def eval(self):
-        return(str(self.value))
+        res = self.value
+        res = res.replace('\'','')
+        return(str(res))
