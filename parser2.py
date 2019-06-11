@@ -16,6 +16,7 @@ class Parser():
         )
         self.ids = {}
         #self.list_cmds = []
+        self.funcs={}
         
     def parse(self):
         @self.pg.production('programa : decl_global')
@@ -25,6 +26,8 @@ class Parser():
             if len(p)>1:
                 print("\nPROG")
                 print(p)
+                print("\nFUNCS:><: " + str(self.funcs))
+                self.funcs['main'].eval() 
                 print("SAIDA>>")
                 return Prog(Util(p).ret_out())
         @self.pg.production('decl_global : decl_variavel')
@@ -89,10 +92,15 @@ class Parser():
         def decl_funcao(p):
             print("\nDECL_FUNCAO")
             print(p)
-            if(len(p) == 5):
-                return Func(p[1][1],p[1][2],p[4])
+            if p[1][0].value in self.funcs:
+                err('Funcao ja existente.')
             else:
-                return Func(p[1][0],p[2],p[1][1])
+                if(len(p) == 5):
+                    self.funcs[p[1][0].value]= Func(p[1][0].value,p[4],p[1][1],p[3])
+                    return self.funcs[p[1][0].value]
+                else:
+                    self.funcs[p[1][0].value]= Func(p[1][0].value,p[2],p[1][1])
+                    return self.funcs[p[1][0].value]
         @self.pg.production('nome_args : ID A_PAR param_formais F_PAR nome_args')
         @self.pg.production('nome_args : ID A_PAR param_formais F_PAR ')
         def nome_args(p):
@@ -150,10 +158,13 @@ class Parser():
             print(p)
             self.ids[p[0].value].atr(p[2].eval())
             print(self.ids[p[0].value].eval())
-        @self.pg.production('iteracao : WHILE A_PAR exp F_PAR PTV')
+        @self.pg.production('iteracao : WHILE A_PAR exp F_PAR comando')
         def iteracao(p):
             print("\nITERACAO")
             print(p)
+            while(p[2].eval() == 1):
+                p[4].eval()
+            return p[4]
         @self.pg.production('decisao : IF A_PAR exp F_PAR comando ELSE comando')
         @self.pg.production('decisao : IF A_PAR exp F_PAR comando')
         def decisao(p):
@@ -189,6 +200,9 @@ class Parser():
         def chamada_func(p):
             print("\nCHAMADA_FUNC")
             print(p)
+            return p[0]
+            #if p[0] in self.funcs:
+                #return self.funcs[p[0]].eval(p[2])
         @self.pg.production('lista_exprs : ')
         @self.pg.production('lista_exprs : exp')
         @self.pg.production('lista_exprs : exp VIRG lista_exprs')

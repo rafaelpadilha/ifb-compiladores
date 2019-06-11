@@ -7,6 +7,7 @@ class Lexer():
 
     def _add_tokens(self):
         # Operadores relacionais
+        self.lexer.ignore(r'[^>>][.]*[<<]')
         self.lexer.add('<>','<>')
         self.lexer.add('<=','<=')
         self.lexer.add('>=','>=')
@@ -54,6 +55,7 @@ class Lexer():
         self.lexer.add('CHAR_L',r'\'([0-9]|[a-zA-Z]|\n|\t|\s|:|\(|\)|,)\'')
 
         self.lexer.ignore('\s+')
+        
         #self.lexer.ignore('\n+')
 
 	    # Identificador
@@ -62,3 +64,7 @@ class Lexer():
     def get_lexer(self):
         self._add_tokens()
         return self.lexer.build()
+
+    def t_error(t):
+        print("Entrada invalida '%s'" % t.value[0])
+        t.lexer.skip(1)

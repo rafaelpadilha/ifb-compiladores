@@ -3,27 +3,46 @@ class Prog():
         self.lista = lista
         
     def eval(self):
+        print("EVAL<"+str(self.lista))
         if(type(self.lista) == list):
             for func in self.lista:
-                if func <> None and func.nome.value == 'main':
+                if func != None and isinstance(func,Func) and func.nome == 'main':
                     func.eval()
         else:
             self.lista.eval()  
                   
 class Func():
-    def __init__(self, nome, cmds, param):
+    def __init__(self, nome, cmds, param ,tipo='Void'):
         self.cmds = cmds
         self.nome = nome
         self.param = param
+        self.tipo = tipo
+        self.resultado = 0
         
-    def eval(self):
-        if self.cmds <> None:
-            if(type(self.cmds) == list):
-                for i in self.cmds:
-                    if i <> None:
-                        return i.eval()
-            else:
-                return self.cmds.eval()
+    def eval(self, t_param=None):
+        if t_param != None :
+            if len(t_param) != len(self.param):
+                err("Quantidade de parametros, nao equivalentes.")
+            print("CMDS><" + str(self.cmds))
+            if self.cmds != None:
+                if(type(self.cmds) == list):
+                    for i in self.cmds:
+                        if i != None:
+                            return i.eval(t_param)
+                else:
+                    return self.cmds.eval(t_param)
+        else:
+            if self.param == None:
+                print("CMDS><" + str(self.cmds))
+                if self.cmds != None:
+                    if(type(self.cmds) == list):
+                        for i in self.cmds:
+                            if i != None:
+                                return i.eval()
+                    else:
+                        return self.cmds.eval()
+            else: 
+                err("Quantidade de parametros, nao equivalentes.")
 
 #Print
 class Print():
